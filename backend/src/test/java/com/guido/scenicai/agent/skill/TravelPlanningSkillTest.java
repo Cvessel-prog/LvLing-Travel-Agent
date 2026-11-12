@@ -49,7 +49,7 @@ class TravelPlanningSkillTest {
         when(routeProvider.walking(List.of(westLake, lingyin))).thenReturn(new RouteResult(
                 westLake, lingyin, 6200, 4800, "walking", List.of(westLake, lingyin), List.of(), "amap"));
         LocalRagService ragService = mock(LocalRagService.class);
-        when(ragService.retrieve(any(), anyString())).thenReturn(LocalRagService.RagResult.miss());
+        when(ragService.retrieve(any(), any(), anyString())).thenReturn(LocalRagService.RagResult.miss());
         TravelPlanningSkill skill = new TravelPlanningSkill(new TravelContextBuilder(), new IntentExtractor(),
                 new TaskPlanner(), new HarnessEngine(new ToolRegistry(List.of(
                         new CityContextTool(cityDiscoveryService), new WeatherTool(weatherProvider),

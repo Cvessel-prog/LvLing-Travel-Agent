@@ -126,19 +126,19 @@ public class TouristVoiceStreamService {
     private String retrieveContext(ChatSession session, String question, List<SourceVO> sources,
                                    long start, Metrics metrics) {
         // 主路径：本地 RAG 向量/关键词检索（kb_chunk 表）
-        LocalRagService.RagResult ragResult = localRagService.retrieve(session.getScenicId(), question);
+        LocalRagService.RagResult ragResult = localRagService.retrieve(session.getCityId(), session.getScenicId(), question);
         metrics.retrieveMs = Math.max(0, elapsedMs(start) - metrics.asrMs);
         if (ragResult.hit()) {
             sources.addAll(ragResult.sources());
             return ragResult.context();
         }
         // 降级：景点数据库关键词匹配
-        return localContext(session.getScenicId(), question, sources, start, metrics);
+        return localContext(session.getCityId(), session.getScenicId(), question, sources, start, metrics);
     }
 
-    private String localContext(Long scenicId, String question, List<SourceVO> sources,
+    private String localContext(Long cityId, Long scenicId, String question, List<SourceVO> sources,
                                 long start, Metrics metrics) {
-        Optional<LocalKnowledgeHit> localHit = localKnowledgeService.findByQuestion(scenicId, null, question);
+        Optional<LocalKnowledgeHit> localHit = localKnowledgeService.findByQuestion(cityId, scenicId, null, question);
         localHit.ifPresent(hit -> sources.add(hit.getSource()));
         metrics.retrieveMs = Math.max(0, elapsedMs(start) - metrics.asrMs);
         return localHit.map(LocalKnowledgeHit::getContent).orElse("");

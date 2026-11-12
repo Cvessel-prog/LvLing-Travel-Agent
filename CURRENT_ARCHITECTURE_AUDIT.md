@@ -237,7 +237,7 @@ TouristChatService
 2. `TouristChatServiceImpl` 同时负责认证、检索、LLM、情绪、TTS、持久化，继续叠加 Agent 会进一步膨胀。
 3. 城市本地 Provider 与外部 AMap Provider 名称相似但职责不同，未来需要 Tool 输入/输出契约隔离。
 4. 当前 `TravelPlan` 没有后端权威模型和版本，无法可靠保存、分享或动态重规划。
-5. RAG 城市隔离尚未贯穿检索入口。
+5. RAG 城市隔离已贯穿检索入口：`LocalRagService` 与 `LocalKnowledgeService` 均按 `cityId` 过滤，未传 `cityId` 时保持全局兼容。
 6. 当前错误降级多为局部 try/catch，没有统一 RetryPolicy、ValidationResult 和 ExecutionTrace。
 7. LLM Router 负责模型路由，但尚无结构化输出校验和工具调用协议。
 8. ChatSession/Message 可作为记忆来源，但不能直接等同长期记忆。

@@ -216,7 +216,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     @Transactional
     public KnowledgeTestVO test(KnowledgeTestDTO dto) {
         long start = System.nanoTime();
-        LocalRagService.RagResult result = localRagService.retrieve(null, dto.getQuestion());
+        LocalRagService.RagResult result = localRagService.retrieve(null, null, dto.getQuestion());
         KnowledgeTestVO vo = toTestVO(result, elapsedMs(start));
         saveTestRecord(dto.getQuestion(), vo);
         return vo;

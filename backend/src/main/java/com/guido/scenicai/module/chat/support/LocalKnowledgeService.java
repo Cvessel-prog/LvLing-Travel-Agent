@@ -18,14 +18,15 @@ public class LocalKnowledgeService {
 
     private final SpotMapper spotMapper;
 
-    public Optional<LocalKnowledgeHit> findByQuestion(Long scenicId, Long spotId, String question) {
+    public Optional<LocalKnowledgeHit> findByQuestion(Long cityId, Long scenicId, Long spotId, String question) {
         if (spotId != null) {
             Spot spot = spotMapper.selectById(spotId);
-            if (spot != null) {
+            if (spot != null && (cityId == null || cityId.equals(spot.getCityId()))) {
                 return Optional.of(toHit(spot));
             }
         }
         List<Spot> spots = spotMapper.selectList(new LambdaQueryWrapper<Spot>()
+                .eq(cityId != null, Spot::getCityId, cityId)
                 .eq(scenicId != null, Spot::getScenicId, scenicId)
                 .eq(Spot::getStatus, 1));
         return spots.stream()
@@ -34,8 +35,8 @@ public class LocalKnowledgeService {
                 .map(this::toHit);
     }
 
-    public Optional<LocalKnowledgeHit> findByRecognizedText(Long scenicId, String text) {
-        return findByQuestion(scenicId, null, text);
+    public Optional<LocalKnowledgeHit> findByRecognizedText(Long cityId, Long scenicId, String text) {
+        return findByQuestion(cityId, scenicId, null, text);
     }
 
     private boolean matches(Spot spot, String question) {
