@@ -23,7 +23,7 @@ public class RagTool implements AgentTool {
     public ToolResult execute(ToolRequest request) {
         String query = request.context().city() + " " + String.join(" ", request.intent().requestedPois())
                 + " 旅行注意事项";
-        LocalRagService.RagResult result = ragService.retrieve(null, query);
+        LocalRagService.RagResult result = ragService.retrieve(null, null, query);
         if (!result.hit()) {
             return ToolResult.degraded(request, toolName(), result, "RAG_NO_RELEVANT_KNOWLEDGE",
                     "本地知识库没有命中与目的地相关的可靠资料");

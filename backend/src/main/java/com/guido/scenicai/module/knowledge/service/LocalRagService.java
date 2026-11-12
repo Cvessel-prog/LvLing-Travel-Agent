@@ -67,21 +67,22 @@ public class LocalRagService {
     }
 
     /**
-     * 检索指定景区的知识库。
+     * 检索指定城市 / 景区的知识库。
      *
+     * @param cityId   城市 ID，null 表示不限城市
      * @param scenicId 景区 ID，null 表示不限景区
      * @param question 用户问题
      * @return 检索结果
      */
-    public RagResult retrieve(Long scenicId, String question) {
-        return retrieve(scenicId, question, DEFAULT_TOP_K);
+    public RagResult retrieve(Long cityId, Long scenicId, String question) {
+        return retrieve(cityId, scenicId, question, DEFAULT_TOP_K);
     }
 
-    public RagResult retrieve(Long scenicId, String question, int topK) {
+    public RagResult retrieve(Long cityId, Long scenicId, String question, int topK) {
         if (!StringUtils.hasText(question)) {
             return RagResult.miss();
         }
-        List<KbChunk> candidates = loadCandidates(scenicId);
+        List<KbChunk> candidates = loadCandidates(cityId, scenicId);
         if (candidates.isEmpty()) {
             return RagResult.miss();
         }
@@ -99,9 +100,12 @@ public class LocalRagService {
         return keywordSearch(candidates, question, topK);
     }
 
-    private List<KbChunk> loadCandidates(Long scenicId) {
+    private List<KbChunk> loadCandidates(Long cityId, Long scenicId) {
         LambdaQueryWrapper<KbChunk> wrapper = new LambdaQueryWrapper<KbChunk>()
                 .eq(KbChunk::getStatus, 1);
+        if (cityId != null) {
+            wrapper.and(w -> w.eq(KbChunk::getCityId, cityId).or().isNull(KbChunk::getCityId));
+        }
         if (scenicId != null) {
             wrapper.and(w -> w.eq(KbChunk::getScenicId, scenicId).or().isNull(KbChunk::getScenicId));
         }

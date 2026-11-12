@@ -136,7 +136,7 @@ public class TouristChatServiceImpl implements TouristChatService {
         String audioUrl = tryTts(answer, avatarForSession(session));
         String emotion = emotionAnalyzer.analyzeInteraction(question, answer);
         Optional<LocalKnowledgeHit> recognizedSpot = localKnowledgeService
-                .findByRecognizedText(session.getScenicId(), recognizedText);
+                .findByRecognizedText(session.getCityId(), session.getScenicId(), recognizedText);
         ChatMessage message = saveMessage(session, touristId, "IMAGE", recognizedText, null,
                 imageUrl, answer, sources, hitKb, emotion, audioUrl, null, start, null);
         return toVisionVO(message, sources, recognizedSpot.map(LocalKnowledgeHit::getSpot).orElse(null));
@@ -155,17 +155,17 @@ public class TouristChatServiceImpl implements TouristChatService {
 
     private String retrieveContext(ChatSession session, Long spotId, String question, List<SourceVO> sources) {
         // 主路径：本地 RAG 向量/关键词检索（kb_chunk 表）
-        LocalRagService.RagResult ragResult = localRagService.retrieve(session.getScenicId(), question);
+        LocalRagService.RagResult ragResult = localRagService.retrieve(session.getCityId(), session.getScenicId(), question);
         if (ragResult.hit()) {
             sources.addAll(ragResult.sources());
             return ragResult.context();
         }
         // 降级：景点数据库关键词匹配
-        return localContext(session.getScenicId(), spotId, question, sources);
+        return localContext(session.getCityId(), session.getScenicId(), spotId, question, sources);
     }
 
-    private String localContext(Long scenicId, Long spotId, String question, List<SourceVO> sources) {
-        Optional<LocalKnowledgeHit> localHit = localKnowledgeService.findByQuestion(scenicId, spotId, question);
+    private String localContext(Long cityId, Long scenicId, Long spotId, String question, List<SourceVO> sources) {
+        Optional<LocalKnowledgeHit> localHit = localKnowledgeService.findByQuestion(cityId, scenicId, spotId, question);
         localHit.ifPresent(hit -> sources.add(hit.getSource()));
         return localHit.map(LocalKnowledgeHit::getContent).orElse("");
     }
